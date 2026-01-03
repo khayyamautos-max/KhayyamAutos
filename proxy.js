@@ -4,6 +4,8 @@ export async function middleware(request) {
   return await updateSession(request)
 }
 
+// This file is the only middleware file - middleware.ts has been completely removed
+
 export const config = {
   matcher: [
     /*
