@@ -158,7 +158,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         selling_price: parseFloat(row["Selling Price"] || row["selling_price"] || 0),
         quantity_in_stock: parseInt(row["Quantity in Stock"] || row["quantity_in_stock"] || 0),
         min_stock_level: parseInt(row["Min Stock Level"] || row["min_stock_level"] || 5),
-        company_id: null, // Will need to match by company name
+        company_id: null as string | null, // Will need to match by company name
       }))
 
       // Match companies by name
@@ -171,7 +171,9 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         
         if (companyName) {
           const company = companies.find((c) => c.name === companyName)
-          if (company) item.company_id = company.id
+          if (company) {
+            item.company_id = company.id
+          }
         }
       }
 

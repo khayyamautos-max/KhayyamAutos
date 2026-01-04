@@ -263,38 +263,6 @@ export default function POSPage() {
       setShowReceipt(true)
       setCart([])
       clearCustomer()
-
-      setLastTransaction(receiptData)
-
-      // Generate PDF receipt
-      generatePDFReceipt({
-        transactionId: transaction.id,
-        date: new Date().toLocaleString(),
-        customer: selectedCustomer ? {
-          name: selectedCustomer.name,
-          phone: selectedCustomer.phone,
-        } : undefined,
-        items: cart.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.selling_price,
-        })),
-        subtotal: subtotal,
-        tax: tax,
-        total: total,
-        previousBalance: !isWalkIn ? previousBalance : undefined,
-        amountPaid: !isWalkIn ? paidAmount : undefined,
-        remainingBalance: !isWalkIn ? remainingBalance : undefined,
-        isWalkIn,
-        paymentMethod,
-      }).catch((error) => {
-        console.error("PDF generation error:", error)
-      })
-
-      toast.success("Transaction Complete - Receipt Downloaded")
-      setShowReceipt(true)
-      setCart([])
-      clearCustomer()
     } catch (err) {
       console.error(err)
       toast.error("Transaction Failed")

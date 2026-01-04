@@ -171,10 +171,12 @@ export async function POST(request: NextRequest) {
     if (txError) {
       // Rollback inventory updates if transaction creation fails
       for (const item of items) {
-        await auth.supabase.rpc("increment_inventory", {
+        const { error: rollbackError } = await auth.supabase.rpc("increment_inventory", {
           row_id: item.id,
           increment_by: item.quantity,
-        }).catch(async () => {
+        })
+        
+        if (rollbackError) {
           // Fallback rollback
           const inventoryItem = inventoryItems.find((inv) => inv.id === item.id)
           if (inventoryItem) {
@@ -186,7 +188,7 @@ export async function POST(request: NextRequest) {
               })
               .eq("id", item.id)
           }
-        })
+        }
       }
       throw txError
     }

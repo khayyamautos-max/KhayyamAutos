@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   // Parallel data fetching for metrics
   const [profileRes, inventoryRes, customersRes, transactionsRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", userData.user.id).single(),
-    supabase.from("inventory").select("id, quantity_in_stock, min_stock_level"),
+    supabase.from("inventory").select("id, part_number, name, quantity_in_stock, min_stock_level"),
     supabase.from("customers").select("id, debt_balance"),
     supabase.from("transactions").select("total_amount, created_at").order("created_at", { ascending: false }),
   ])

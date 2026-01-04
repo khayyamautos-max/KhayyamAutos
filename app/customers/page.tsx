@@ -18,11 +18,11 @@ export default async function CustomersPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <BackButton />
-          <div>
+        <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-primary">Customer Ledger</h1>
             <p className="text-muted-foreground italic text-xs sm:text-sm font-mono">
-              Entity directory // Credit & balance tracking
-            </p>
+            Entity directory // Credit & balance tracking
+          </p>
           </div>
         </div>
         <CustomersClient />
