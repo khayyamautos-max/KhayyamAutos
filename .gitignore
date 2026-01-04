@@ -26,5 +26,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# explicitly ignore middleware.ts to prevent conflicts with proxy.js
-middleware.ts
+# middleware.ts is now the standard Next.js middleware file and should be tracked
