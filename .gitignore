@@ -25,3 +25,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# explicitly ignore middleware.ts to prevent conflicts with proxy.js
+middleware.ts
