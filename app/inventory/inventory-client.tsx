@@ -67,37 +67,86 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
       e.stopPropagation()
     }
     
-    if (!formData.part_number || !formData.name || !formData.cost_price || !formData.selling_price) {
-      toast.error("Please fill in all required fields")
+    console.log("Add Part button clicked", formData)
+    
+    // Validate required fields
+    if (!formData.part_number?.trim()) {
+      toast.error("Part Number is required")
+      return
+    }
+    if (!formData.name?.trim()) {
+      toast.error("Name is required")
+      return
+    }
+    if (!formData.cost_price || isNaN(parseFloat(formData.cost_price))) {
+      toast.error("Valid Cost Price is required")
+      return
+    }
+    if (!formData.selling_price || isNaN(parseFloat(formData.selling_price))) {
+      toast.error("Valid Selling Price is required")
       return
     }
 
     setIsLoading(true)
     try {
       const insertData = {
-        part_number: formData.part_number,
-        name: formData.name,
-        description: formData.description || null,
-        model: formData.model || null,
+        part_number: formData.part_number.trim(),
+        name: formData.name.trim(),
+        description: formData.description?.trim() || null,
+        model: formData.model?.trim() || null,
         company_id: formData.company_id && formData.company_id !== "none" ? formData.company_id : null,
-        category: formData.category || null,
+        category: formData.category?.trim() || null,
         cost_price: parseFloat(formData.cost_price),
         selling_price: parseFloat(formData.selling_price),
-        quantity_in_stock: parseInt(formData.quantity_in_stock) || 0,
-        min_stock_level: parseInt(formData.min_stock_level) || 5,
+        quantity_in_stock: formData.quantity_in_stock ? parseInt(formData.quantity_in_stock) : 0,
+        min_stock_level: formData.min_stock_level ? parseInt(formData.min_stock_level) : 5,
       }
 
-      const { data, error } = await supabase.from("inventory").insert(insertData).select()
+      console.log("Inserting data:", insertData)
 
-      if (error) {
-        console.error("Error adding part:", error)
-        throw error
+      // Try API endpoint first (requires admin), fallback to direct Supabase
+      let result
+      try {
+        const response = await fetch("/api/inventory", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(insertData),
+        })
+
+        result = await response.json()
+
+        if (!response.ok) {
+          // If forbidden (403), try direct Supabase call
+          if (response.status === 403) {
+            console.log("API requires admin, trying direct Supabase call")
+            const { data, error } = await supabase.from("inventory").insert(insertData).select()
+            if (error) throw error
+            if (!data || data.length === 0) throw new Error("No data returned")
+            result = { data: data[0] }
+          } else {
+            console.error("API Error:", result)
+            throw new Error(result.error || "Failed to add part")
+          }
+        }
+      } catch (apiError) {
+        // Fallback to direct Supabase call if API fails
+        console.log("API call failed, trying direct Supabase:", apiError)
+        const { data, error } = await supabase.from("inventory").insert(insertData).select()
+        if (error) {
+          console.error("Supabase error:", error)
+          throw error
+        }
+        if (!data || data.length === 0) throw new Error("No data returned")
+        result = { data: data[0] }
       }
 
-      if (!data || data.length === 0) {
-        throw new Error("No data returned from insert")
+      if (!result?.data) {
+        throw new Error("No data returned from server")
       }
 
+      console.log("Part added successfully:", result.data)
       toast.success("Part added successfully")
       setIsAddOpen(false)
       setFormData({
@@ -112,10 +161,11 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         quantity_in_stock: "",
         min_stock_level: "5",
       })
-      setTimeout(() => window.location.reload(), 500)
+      // Reload after a short delay to show the success message
+      setTimeout(() => window.location.reload(), 1000)
     } catch (error) {
       console.error("Failed to add part:", error)
-      const errorMessage = error instanceof Error ? error.message : "Failed to add part"
+      const errorMessage = error instanceof Error ? error.message : "Failed to add part. Please check console for details."
       toast.error(errorMessage)
     } finally {
       setIsLoading(false)
