@@ -53,7 +53,7 @@ export default async function DashboardPage() {
     .reduce((sum, t) => sum + Number(t.total_amount), 0)
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-700">
+    <div className="pt-4 md:pt-6 space-y-6 md:space-y-8 animate-in fade-in duration-700">
       <div className="flex items-center gap-4">
         <BackButton />
       </div>

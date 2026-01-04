@@ -272,7 +272,7 @@ export default function POSPage() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
+    <div className="pt-4 md:pt-6 space-y-4 md:space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-4">
         <BackButton />
         <div>

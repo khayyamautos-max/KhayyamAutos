@@ -17,7 +17,7 @@ export default async function HistoryPage() {
     .order("created_at", { ascending: false })
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-in slide-in-from-right-2 duration-500">
+    <div className="pt-4 md:pt-6 space-y-4 md:space-y-6 animate-in slide-in-from-right-2 duration-500">
       <div className="flex items-center gap-4">
         <BackButton />
         <div>

@@ -12,7 +12,7 @@ export default async function CompaniesPage() {
   const { data: companies } = await supabase.from("companies").select("*").order("name", { ascending: true })
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-2 duration-500">
+    <div className="pt-4 md:pt-6 space-y-4 md:space-y-6 animate-in slide-in-from-bottom-2 duration-500">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <BackButton />

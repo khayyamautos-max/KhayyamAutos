@@ -34,6 +34,7 @@ interface InventoryItem {
   part_number: string
   name: string
   description?: string
+  model?: string
   company_id?: string
   category?: string
   cost_price: number
@@ -49,6 +50,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
     part_number: "",
     name: "",
     description: "",
+    model: "",
     company_id: "none",
     category: "",
     cost_price: "",
@@ -71,6 +73,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         part_number: formData.part_number,
         name: formData.name,
         description: formData.description || null,
+        model: formData.model || null,
         company_id: formData.company_id && formData.company_id !== "none" ? formData.company_id : null,
         category: formData.category || null,
         cost_price: parseFloat(formData.cost_price),
@@ -87,6 +90,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         part_number: "",
         name: "",
         description: "",
+        model: "",
         company_id: "none",
         category: "",
         cost_price: "",
@@ -116,6 +120,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         "Part Number": item.part_number,
         "Name": item.name,
         "Description": item.description || "",
+        "Model": item.model || "",
         "Company": item.companies?.name || "",
         "Category": item.category || "",
         "Cost Price": item.cost_price,
@@ -153,6 +158,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         part_number: row["Part Number"] || row["part_number"],
         name: row["Name"] || row["name"],
         description: row["Description"] || row["description"] || null,
+        model: row["Model"] || row["model"] || null,
         category: row["Category"] || row["category"] || null,
         cost_price: parseFloat(row["Cost Price"] || row["cost_price"] || 0),
         selling_price: parseFloat(row["Selling Price"] || row["selling_price"] || 0),
@@ -199,6 +205,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
           "Part Number": "PART-001",
           "Name": "Example Part Name",
           "Description": "Part description",
+          "Model": "Model-123",
           "Company": "SGA",
           "Category": "Drivetrain",
           "Cost Price": 100.00,
@@ -259,6 +266,15 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Part description"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="model">Model</Label>
+              <Input
+                id="model"
+                value={formData.model}
+                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                placeholder="Part model (e.g., Model-123)"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">

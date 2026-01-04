@@ -63,6 +63,7 @@ export async function PUT(
       part_number,
       name,
       description,
+      model,
       company_id,
       category,
       cost_price,
@@ -76,6 +77,7 @@ export async function PUT(
     if (part_number !== undefined) updateData.part_number = part_number
     if (name !== undefined) updateData.name = name
     if (description !== undefined) updateData.description = description
+    if (model !== undefined) updateData.model = model
     if (company_id !== undefined) updateData.company_id = company_id
     if (category !== undefined) updateData.category = category
     if (cost_price !== undefined) {

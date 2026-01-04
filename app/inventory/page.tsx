@@ -29,7 +29,7 @@ export default async function InventoryPage() {
   }) || []
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
+    <div className="pt-4 md:pt-6 space-y-4 md:space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <BackButton />
@@ -83,6 +83,7 @@ export default async function InventoryPage() {
             <TableRow className="hover:bg-transparent border-white/5">
               <TableHead className="text-primary font-mono uppercase text-[10px] tracking-widest">Part #</TableHead>
               <TableHead className="text-primary font-mono uppercase text-[10px] tracking-widest">Name</TableHead>
+              <TableHead className="text-primary font-mono uppercase text-[10px] tracking-widest">Model</TableHead>
               <TableHead className="text-primary font-mono uppercase text-[10px] tracking-widest">Company</TableHead>
               <TableHead className="text-primary font-mono uppercase text-[10px] tracking-widest">Category</TableHead>
               <TableHead className="text-primary font-mono uppercase text-[10px] tracking-widest text-right">
@@ -106,6 +107,7 @@ export default async function InventoryPage() {
                 <TableRow key={part.id} className="border-white/5 hover:bg-white/5 transition-colors">
                   <TableCell className="font-mono text-xs sm:text-sm">{part.part_number}</TableCell>
                   <TableCell className="font-medium text-xs sm:text-sm">{part.name}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs sm:text-sm">{part.model || "—"}</TableCell>
                   <TableCell className="text-muted-foreground text-xs sm:text-sm">{part.companies?.name}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className="border-primary/20 text-primary/80 bg-primary/5">
@@ -140,7 +142,7 @@ export default async function InventoryPage() {
             })}
             {(!inventory || inventory.length === 0) && (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground italic">
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground italic">
                   No parts found in the neural grid.
                 </TableCell>
               </TableRow>

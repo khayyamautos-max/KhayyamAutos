@@ -14,7 +14,7 @@ export default async function CustomersPage() {
   const { data: customers } = await supabase.from("customers").select("*").order("name", { ascending: true })
 
   return (
-    <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
+    <div className="pt-4 md:pt-6 space-y-4 md:space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <BackButton />
