@@ -178,9 +178,6 @@ export default function POSPage() {
   const remainingBalance = isWalkIn ? 0 : previousBalance + total - paidAmount
 
   const handleCheckout = async () => {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/pos/page.tsx:180',message:'Checkout started - using API endpoint',data:{cartLength:cart.length,isWalkIn,hasCustomer:!!selectedCustomer},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     if (cart.length === 0) {
       toast.error("Cart is empty")
       return
@@ -200,10 +197,6 @@ export default function POSPage() {
 
     try {
       // Use API endpoint instead of direct database access
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/pos/page.tsx:201',message:'Calling API checkout endpoint',data:{cartItems:cart.map(i=>({id:i.id,qty:i.quantity}))},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-      
       const response = await fetch("/api/pos/checkout", {
         method: "POST",
         headers: {
@@ -229,10 +222,6 @@ export default function POSPage() {
 
       const result = await response.json()
       const transaction = result.data
-
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/pos/page.tsx:230',message:'API checkout successful',data:{transactionId:transaction?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
 
       const receiptData = {
         ...transaction,

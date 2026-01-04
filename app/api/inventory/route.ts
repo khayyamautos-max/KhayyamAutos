@@ -92,9 +92,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate and parse numeric fields
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/api/inventory/route.ts:94',message:'Before parse validation',data:{cost_price,parsedCost:parseFloat(cost_price),selling_price,parsedSelling:parseFloat(selling_price),quantity_in_stock,parsedQty:parseInt(quantity_in_stock)},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
     const parsedCost = parseFloat(cost_price)
     const parsedSelling = parseFloat(selling_price)
     const parsedQty = parseInt(quantity_in_stock) || 0
@@ -124,9 +121,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/api/inventory/route.ts:120',message:'Parse validation passed',data:{costIsNaN:isNaN(parsedCost),sellingIsNaN:isNaN(parsedSelling),qtyIsNaN:isNaN(parsedQty),minIsNaN:isNaN(parsedMin)},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
     const { data, error } = await auth.supabase
       .from("inventory")
       .insert({

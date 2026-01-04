@@ -22,25 +22,16 @@ export async function authenticateRequest(): Promise<AuthenticatedRequest | Next
   }
 
   // Get user profile with role
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/api/auth.ts:25',message:'Before profile fetch',data:{userId:user.id},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle() // Use maybeSingle() instead of single() to handle missing profiles gracefully
 
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/api/auth.ts:29',message:'Profile fetch result',data:{profileExists:!!profile,profileError:profileError?.code,role:profile?.role},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
-
   // Profile error is non-critical - user can still authenticate without a profile
   // Only log if it's not a "not found" error
   if (profileError && profileError.code !== "PGRST116") {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'lib/api/auth.ts:35',message:'Profile fetch error (non-critical)',data:{error:profileError.message},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
+    // Log non-critical errors if needed (can be removed or replaced with proper logging)
   }
 
   return {
