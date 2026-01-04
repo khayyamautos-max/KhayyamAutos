@@ -61,7 +61,12 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
-  const handleAddPart = async () => {
+  const handleAddPart = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    
     if (!formData.part_number || !formData.name || !formData.cost_price || !formData.selling_price) {
       toast.error("Please fill in all required fields")
       return
@@ -69,7 +74,7 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
 
     setIsLoading(true)
     try {
-      const { error } = await supabase.from("inventory").insert({
+      const insertData = {
         part_number: formData.part_number,
         name: formData.name,
         description: formData.description || null,
@@ -80,9 +85,18 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
         selling_price: parseFloat(formData.selling_price),
         quantity_in_stock: parseInt(formData.quantity_in_stock) || 0,
         min_stock_level: parseInt(formData.min_stock_level) || 5,
-      })
+      }
 
-      if (error) throw error
+      const { data, error } = await supabase.from("inventory").insert(insertData).select()
+
+      if (error) {
+        console.error("Error adding part:", error)
+        throw error
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("No data returned from insert")
+      }
 
       toast.success("Part added successfully")
       setIsAddOpen(false)
@@ -100,7 +114,9 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
       })
       setTimeout(() => window.location.reload(), 500)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to add part")
+      console.error("Failed to add part:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to add part"
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -351,10 +367,10 @@ export function InventoryClient({ companies }: { companies: Company[] }) {
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+              <Button variant="outline" type="button" onClick={() => setIsAddOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleAddPart} disabled={isLoading}>
+              <Button type="button" onClick={handleAddPart} disabled={isLoading}>
                 {isLoading ? "Adding..." : "Add Part"}
               </Button>
             </div>
