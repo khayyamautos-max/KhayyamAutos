@@ -20,9 +20,9 @@ export async function GET(
       .from("customers")
       .select("*")
       .eq("id", id)
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(
@@ -59,16 +59,25 @@ export async function PUT(
     if (name !== undefined) updateData.name = name
     if (phone !== undefined) updateData.phone = phone
     if (address !== undefined) updateData.address = address
-    if (debt_balance !== undefined) updateData.debt_balance = parseFloat(debt_balance)
+    if (debt_balance !== undefined) {
+      const parsed = parseFloat(debt_balance)
+      if (isNaN(parsed)) {
+        return NextResponse.json(
+          { error: "Invalid debt_balance: must be a number" },
+          { status: 400 }
+        )
+      }
+      updateData.debt_balance = parsed
+    }
 
     const { data, error } = await auth.supabase
       .from("customers")
       .update(updateData)
       .eq("id", id)
       .select()
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(

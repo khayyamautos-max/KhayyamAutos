@@ -20,9 +20,9 @@ export async function GET(
       .from("transactions")
       .select("*, customers(name, id), profiles(full_name, email)")
       .eq("id", id)
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(

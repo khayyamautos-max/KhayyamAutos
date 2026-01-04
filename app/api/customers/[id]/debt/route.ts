@@ -26,13 +26,23 @@ export async function POST(
     }
 
     // Get current customer
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/api/customers/[id]/debt/route.ts:29',message:'Before customer fetch',data:{customerId:id},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     const { data: customer, error: fetchError } = await auth.supabase
       .from("customers")
       .select("debt_balance")
       .eq("id", id)
-      .single()
+      .maybeSingle() // Use maybeSingle() to handle missing records gracefully
 
-    if (fetchError) throw fetchError
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/api/customers/[id]/debt/route.ts:33',message:'Customer fetch result',data:{customerExists:!!customer,fetchError:fetchError?.code},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+
+    // Handle errors - PGRST116 is "not found", which is expected
+    if (fetchError && fetchError.code !== "PGRST116") {
+      throw fetchError
+    }
 
     if (!customer) {
       return NextResponse.json(

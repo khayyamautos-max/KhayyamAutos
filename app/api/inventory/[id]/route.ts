@@ -20,9 +20,9 @@ export async function GET(
       .from("inventory")
       .select("*, companies(name, id)")
       .eq("id", id)
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(
@@ -78,10 +78,46 @@ export async function PUT(
     if (description !== undefined) updateData.description = description
     if (company_id !== undefined) updateData.company_id = company_id
     if (category !== undefined) updateData.category = category
-    if (cost_price !== undefined) updateData.cost_price = parseFloat(cost_price)
-    if (selling_price !== undefined) updateData.selling_price = parseFloat(selling_price)
-    if (quantity_in_stock !== undefined) updateData.quantity_in_stock = parseInt(quantity_in_stock)
-    if (min_stock_level !== undefined) updateData.min_stock_level = parseInt(min_stock_level)
+    if (cost_price !== undefined) {
+      const parsed = parseFloat(cost_price)
+      if (isNaN(parsed)) {
+        return NextResponse.json(
+          { error: "Invalid cost_price: must be a number" },
+          { status: 400 }
+        )
+      }
+      updateData.cost_price = parsed
+    }
+    if (selling_price !== undefined) {
+      const parsed = parseFloat(selling_price)
+      if (isNaN(parsed)) {
+        return NextResponse.json(
+          { error: "Invalid selling_price: must be a number" },
+          { status: 400 }
+        )
+      }
+      updateData.selling_price = parsed
+    }
+    if (quantity_in_stock !== undefined) {
+      const parsed = parseInt(quantity_in_stock)
+      if (isNaN(parsed)) {
+        return NextResponse.json(
+          { error: "Invalid quantity_in_stock: must be a number" },
+          { status: 400 }
+        )
+      }
+      updateData.quantity_in_stock = parsed
+    }
+    if (min_stock_level !== undefined) {
+      const parsed = parseInt(min_stock_level)
+      if (isNaN(parsed)) {
+        return NextResponse.json(
+          { error: "Invalid min_stock_level: must be a number" },
+          { status: 400 }
+        )
+      }
+      updateData.min_stock_level = parsed
+    }
 
     updateData.updated_at = new Date().toISOString()
 
@@ -90,9 +126,9 @@ export async function PUT(
       .update(updateData)
       .eq("id", id)
       .select("*, companies(name, id)")
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(

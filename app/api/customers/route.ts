@@ -62,13 +62,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate debt_balance if provided
+    let parsedDebt = 0
+    if (debt_balance !== undefined && debt_balance !== null) {
+      parsedDebt = parseFloat(debt_balance)
+      if (isNaN(parsedDebt)) {
+        return NextResponse.json(
+          { error: "Invalid debt_balance: must be a number" },
+          { status: 400 }
+        )
+      }
+    }
+
     const { data, error } = await auth.supabase
       .from("customers")
       .insert({
         name,
         phone: phone || null,
         address: address || null,
-        debt_balance: debt_balance ? parseFloat(debt_balance) : 0,
+        debt_balance: parsedDebt,
       })
       .select()
       .single()

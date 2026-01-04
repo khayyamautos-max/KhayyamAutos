@@ -20,9 +20,9 @@ export async function GET(
       .from("companies")
       .select("*")
       .eq("id", id)
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(
@@ -72,9 +72,9 @@ export async function PUT(
       .update(updateData)
       .eq("id", id)
       .select()
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(

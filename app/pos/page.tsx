@@ -178,6 +178,9 @@ export default function POSPage() {
   const remainingBalance = isWalkIn ? 0 : previousBalance + total - paidAmount
 
   const handleCheckout = async () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/pos/page.tsx:180',message:'Checkout started - using API endpoint',data:{cartLength:cart.length,isWalkIn,hasCustomer:!!selectedCustomer},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     if (cart.length === 0) {
       toast.error("Cart is empty")
       return
@@ -196,53 +199,40 @@ export default function POSPage() {
     setIsProcessing(true)
 
     try {
-      const { data: userData } = await supabase.auth.getUser()
-
-      // 1. Create Transaction
-      const { data: transaction, error: txError } = await supabase
-        .from("transactions")
-        .insert({
+      // Use API endpoint instead of direct database access
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/pos/page.tsx:201',message:'Calling API checkout endpoint',data:{cartItems:cart.map(i=>({id:i.id,qty:i.quantity}))},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      
+      const response = await fetch("/api/pos/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           customer_id: isWalkIn ? null : selectedCustomer?.id,
-          staff_id: userData.user?.id,
-          total_amount: total,
-          payment_method: paymentMethod,
-          status: remainingBalance > 0 ? "pending_debt" : "completed",
           items: cart.map((item) => ({
             id: item.id,
             name: item.name,
             quantity: item.quantity,
             price: item.selling_price,
           })),
-        })
-        .select()
-        .single()
+          payment_method: paymentMethod,
+          tax_rate: 0.08,
+        }),
+      })
 
-      if (txError) throw txError
-
-      // 2. Update Inventory
-      for (const item of cart) {
-        const { error: invError } = await supabase.rpc("decrement_inventory", {
-          row_id: item.id,
-          decrement_by: item.quantity,
-        })
-        if (invError) {
-          await supabase
-            .from("inventory")
-            .update({
-              quantity_in_stock: item.quantity_in_stock - item.quantity,
-            })
-            .eq("id", item.id)
-        }
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Checkout failed")
       }
 
-      // 3. Update Customer Debt if not walk-in
-      if (!isWalkIn && selectedCustomer) {
-        const newDebt = remainingBalance
-        await supabase
-          .from("customers")
-          .update({ debt_balance: newDebt })
-          .eq("id", selectedCustomer.id)
-      }
+      const result = await response.json()
+      const transaction = result.data
+
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/pos/page.tsx:230',message:'API checkout successful',data:{transactionId:transaction?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
 
       const receiptData = {
         ...transaction,
@@ -252,6 +242,38 @@ export default function POSPage() {
         remainingBalance,
         isWalkIn,
       }
+
+      setLastTransaction(receiptData)
+
+      // Generate PDF receipt
+      generatePDFReceipt({
+        transactionId: transaction.id,
+        date: new Date().toLocaleString(),
+        customer: selectedCustomer ? {
+          name: selectedCustomer.name,
+          phone: selectedCustomer.phone,
+        } : undefined,
+        items: cart.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.selling_price,
+        })),
+        subtotal: subtotal,
+        tax: tax,
+        total: total,
+        previousBalance: !isWalkIn ? previousBalance : undefined,
+        amountPaid: !isWalkIn ? paidAmount : undefined,
+        remainingBalance: !isWalkIn ? remainingBalance : undefined,
+        isWalkIn,
+        paymentMethod,
+      }).catch((error) => {
+        console.error("PDF generation error:", error)
+      })
+
+      toast.success("Transaction Complete - Receipt Downloaded")
+      setShowReceipt(true)
+      setCart([])
+      clearCustomer()
 
       setLastTransaction(receiptData)
 

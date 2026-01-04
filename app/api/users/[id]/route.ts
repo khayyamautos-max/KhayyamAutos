@@ -27,9 +27,9 @@ export async function GET(
       .from("profiles")
       .select("id, email, full_name, role, created_at")
       .eq("id", id)
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(
@@ -88,9 +88,9 @@ export async function PUT(
       .update(updateData)
       .eq("id", id)
       .select("id, email, full_name, role, created_at")
-      .single()
+      .maybeSingle()
 
-    if (error) throw error
+    if (error && error.code !== "PGRST116") throw error
 
     if (!data) {
       return NextResponse.json(

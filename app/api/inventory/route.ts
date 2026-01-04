@@ -91,6 +91,42 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate and parse numeric fields
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/api/inventory/route.ts:94',message:'Before parse validation',data:{cost_price,parsedCost:parseFloat(cost_price),selling_price,parsedSelling:parseFloat(selling_price),quantity_in_stock,parsedQty:parseInt(quantity_in_stock)},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
+    const parsedCost = parseFloat(cost_price)
+    const parsedSelling = parseFloat(selling_price)
+    const parsedQty = parseInt(quantity_in_stock) || 0
+    const parsedMin = parseInt(min_stock_level) || 5
+
+    if (isNaN(parsedCost)) {
+      return NextResponse.json(
+        { error: "Invalid cost_price: must be a number" },
+        { status: 400 }
+      )
+    }
+    if (isNaN(parsedSelling)) {
+      return NextResponse.json(
+        { error: "Invalid selling_price: must be a number" },
+        { status: 400 }
+      )
+    }
+    if (isNaN(parsedQty) && quantity_in_stock !== undefined) {
+      return NextResponse.json(
+        { error: "Invalid quantity_in_stock: must be a number" },
+        { status: 400 }
+      )
+    }
+    if (isNaN(parsedMin) && min_stock_level !== undefined) {
+      return NextResponse.json(
+        { error: "Invalid min_stock_level: must be a number" },
+        { status: 400 }
+      )
+    }
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/458cece2-39d1-49f1-8ecb-2abc4c18a496',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/api/inventory/route.ts:120',message:'Parse validation passed',data:{costIsNaN:isNaN(parsedCost),sellingIsNaN:isNaN(parsedSelling),qtyIsNaN:isNaN(parsedQty),minIsNaN:isNaN(parsedMin)},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     const { data, error } = await auth.supabase
       .from("inventory")
       .insert({
@@ -99,10 +135,10 @@ export async function POST(request: NextRequest) {
         description,
         company_id: company_id || null,
         category,
-        cost_price: parseFloat(cost_price),
-        selling_price: parseFloat(selling_price),
-        quantity_in_stock: parseInt(quantity_in_stock) || 0,
-        min_stock_level: parseInt(min_stock_level) || 5,
+        cost_price: parsedCost,
+        selling_price: parsedSelling,
+        quantity_in_stock: parsedQty,
+        min_stock_level: parsedMin,
       })
       .select("*, companies(name, id)")
       .single()
